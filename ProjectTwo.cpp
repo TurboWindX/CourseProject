@@ -165,6 +165,7 @@ Course BinarySearchTree::Search(string courseNumber) {
     string prekey = courseNumber.substr(courseNumber.length() - 3);
     unsigned key = atoi(prekey.c_str()) % 10;
 
+
     while (curNode != nullptr) {
         if (curNode->key == key) {
             if (curNode->course.getNumber() == courseNumber) {
@@ -247,7 +248,6 @@ void BinarySearchTree::preOrder(Node* node) {
 }
 
 void loadLines(string csvPath, BinarySearchTree* bst) {
-    
     ifstream csv(csvPath);
     if (csv.is_open()) {
         string line;
@@ -270,7 +270,6 @@ void loadLines(string csvPath, BinarySearchTree* bst) {
             }
             
             bst->Insert(theCourse);
-            
         }
         csv.close();
     }
@@ -331,13 +330,27 @@ int main(int argc, char* argv[]) {
         case 2:
             bst->InOrder();
             break;
+
         case 3:
-            bst->Search(aCourseNumber);
+            ticks = clock();
+
+            aCourse = bst->Search(aCourseNumber);
+
+            ticks = clock() - ticks; // current clock ticks minus starting clock ticks
+
+            if (!aCourse.getNumber().empty()) {
+                cout << aCourse.getNumber() << endl;
+            }
+            else {
+                cout << "Course Number " << aCourseNumber << " not found." << endl;
+            }
+
+            cout << "time: " << ticks << " clock ticks" << endl;
+            cout << "time: " << ticks * 1.0 / CLOCKS_PER_SEC << " seconds" << endl;
             break;
 
         }
-        
 
     }
-    return 0;
+    cout << "Good bye." << endl;
 }
