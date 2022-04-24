@@ -91,7 +91,6 @@ private:
     void inOrder(Node* node);
     void postOrder(Node* node);
     void preOrder(Node* node);
-    vector<string> loadLines(string csvPath, BinarySearchTree* bst);
 
 public:
     BinarySearchTree();
@@ -163,7 +162,8 @@ Course BinarySearchTree::Search(string courseNumber) {
     // FIXME (7) Implement searching the tree for a course
     Node* curNode = root;
     Course course;
-    unsigned key = atoi(courseNumber.c_str()) % 10;
+    string prekey = courseNumber.substr(courseNumber.length() - 3);
+    unsigned key = atoi(prekey.c_str()) % 10;
 
     while (curNode != nullptr) {
         if (curNode->key == key) {
@@ -216,8 +216,13 @@ void BinarySearchTree::inOrder(Node* node) {
     // FixMe (9): Pre order root
     if (node != nullptr) {
         inOrder(node->left);
-        cout << node->key << ", " << node->course.getNumber() << ", " << node->course.getTitle() << ", "
-            << node->course.getPrereqs().at(0) << ", " << node->course.getPrereqs().at(1) << " ==> " << endl;
+        
+        cout << node->key << ", " << node->course.getNumber() << ", " << node->course.getTitle();
+        vector<string> prereqs = node->course.getPrereqs();
+        for (int i = 0; i < prereqs.size(); i++) {
+            cout << " => " << prereqs[i];
+        }
+        cout << endl;
         inOrder(node->right);
     }
 }
@@ -241,14 +246,14 @@ void BinarySearchTree::preOrder(Node* node) {
     }
 }
 
-void loadLines(string csvPath, BinarySearchTree bst) {
-    Course theCourse;
+void loadLines(string csvPath, BinarySearchTree* bst) {
+    
     ifstream csv(csvPath);
     if (csv.is_open()) {
         string line;
-        vector<string> csvline;
-        
         while (getline(csv, line)) {
+            vector<string> csvline;
+            Course theCourse;
             printf(line.c_str());
             stringstream ss(line.c_str());
             while (ss.good()) {
@@ -264,8 +269,8 @@ void loadLines(string csvPath, BinarySearchTree bst) {
                 }
             }
             
-            bst.Insert(theCourse);
-            csvline = vector<string>();
+            bst->Insert(theCourse);
+            
         }
         csv.close();
     }
@@ -295,7 +300,7 @@ int main(int argc, char* argv[]) {
     clock_t ticks;
 
     // Define a binary search tree to hold all bids
-    BinarySearchTree bst = BinarySearchTree();
+    BinarySearchTree* bst = nullptr;
 
     Course aCourse;
 
@@ -312,7 +317,7 @@ int main(int argc, char* argv[]) {
         switch (choice) {
 
         case 1:
-
+            bst = new BinarySearchTree();
             ticks = clock();
 
             loadLines(csvPath, bst);
@@ -324,9 +329,15 @@ int main(int argc, char* argv[]) {
             break;
 
         case 2:
-            bst.InOrder();
+            bst->InOrder();
             break;
+        case 3:
+            bst->Search(aCourseNumber);
+            break;
+
         }
+        
+
     }
     return 0;
 }
