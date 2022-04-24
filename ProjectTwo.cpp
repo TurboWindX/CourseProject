@@ -11,68 +11,54 @@ class Course {
 private:
     string courseNumber;
     string courseTitle;
-    string prereq1, prereq2, prereq3, prereq4;
+    vector<string> prereqs;
 
 public:
     Course();
     virtual ~Course();
-    void setCourseNumber(string inputCourseNumber);
-    void setCourseTitle(string inputCourseTitle);
-    void setPrereq1(string inputPrereq1);
-    void setPrereq2(string inputPrereq2);
-    string getCourseNumber();
-    string getCourseTitle();
-    string getPrereq1();
-    string getPrereq2();
+    void setNumber(string inputCourseNumber);
+    void setTitle(string inputCourseTitle);
+    void addPrereq(string prereq);
+    string getNumber();
+    string getTitle();
+    vector<string> getPrereqs();
 };
 
 // Course Class constructor
 Course::Course() {
     courseNumber = "";
     courseTitle = "";
-    prereq1 = "";
-    prereq2 = "";
-    prereq3 = "";
-    prereq4 = "";
+    prereqs = vector<string>();
 }
 
-// Course Class destructor
 Course::~Course() {
-    // ******************************************************    <--------
+    //free(this);
 }
 
 // Course Class setters
-void Course::setCourseNumber(string inputCourseNumber) {
-    courseNumber = inputCourseNumber;
+void Course::setNumber(string CourseNumber) {
+    courseNumber = CourseNumber;
 }
 
-void Course::setCourseTitle(string inputCourseTitle) {
-    courseTitle = inputCourseTitle;
+void Course::setTitle(string CourseTitle) {
+    courseTitle = CourseTitle;
 }
 
-void Course::setPrereq1(string inputPrereq1) {
-    prereq1 = inputPrereq1;
-}
-
-void Course::setPrereq2(string inputPrereq2) {
-    prereq2 = inputPrereq2;
+void Course::addPrereq(string prereq) {
+    prereqs.push_back(prereq);
 }
 
 // Course Class getters
-string Course::getCourseNumber() {
+string Course::getNumber() {
     return courseNumber;
 }
 
-string Course::getCourseTitle() {
+string Course::getTitle() {
     return courseTitle;
 }
 
-string Course::getPrereq1() {
-    return prereq1;
-}
-
-string Course::getPrereq2() {
-    return prereq2;
+vector<string> Course::getPrereqs() {
+    return prereqs;
 }
 
 class BinarySearchTree {
@@ -84,8 +70,6 @@ private:
         Course course;
         // create the key for the given course
         unsigned key;
-
-        Node* parent = nullptr;
         Node* left = nullptr;
         Node* right = nullptr;
 
@@ -97,7 +81,9 @@ private:
 
         Node(Course aCourse) {
             course = aCourse;
-            key = Hash(atoi(course.getCourseNumber().c_str()));
+            string prekey = course.getNumber().c_str();
+            prekey = prekey.substr(prekey.length() - 3);
+            key = Hash(atoi(prekey.c_str()));
         }
     };
     Node* root;
@@ -181,7 +167,7 @@ Course BinarySearchTree::Search(string courseNumber) {
 
     while (curNode != nullptr) {
         if (curNode->key == key) {
-            if (curNode->course.getCourseNumber() == courseNumber) {
+            if (curNode->course.getNumber() == courseNumber) {
                 return curNode->course;
             }
             return curNode->course;
@@ -208,7 +194,6 @@ Course BinarySearchTree::Search(string courseNumber) {
 void BinarySearchTree::addNode(Node* node, Course course) {
     // FIXME (8) Implement inserting a course into the tree
     Node* nodeToInsert = new Node(course);
-    nodeToInsert->parent = node;
 
     if (nodeToInsert->key <= node->key) {
         if (node->left == nullptr) {
@@ -231,8 +216,8 @@ void BinarySearchTree::inOrder(Node* node) {
     // FixMe (9): Pre order root
     if (node != nullptr) {
         inOrder(node->left);
-        cout << node->key << ", " << node->course.getCourseNumber() << ", " << node->course.getCourseTitle() << ", "
-            << node->course.getPrereq1() << ", " << node->course.getPrereq2() << " ==> " << endl;
+        cout << node->key << ", " << node->course.getNumber() << ", " << node->course.getTitle() << ", "
+            << node->course.getPrereqs().at(0) << ", " << node->course.getPrereqs().at(1) << " ==> " << endl;
         inOrder(node->right);
     }
 }
@@ -241,75 +226,50 @@ void BinarySearchTree::postOrder(Node* node) {
     if (node != nullptr) {
         postOrder(node->left);
         postOrder(node->right);
-        cout << node->key << ", " << node->course.getCourseNumber() << ", " << node->course.getCourseTitle() << ", "
-            << node->course.getPrereq1() << ", " << node->course.getPrereq2() << " ==> " << endl;
+        cout << node->key << ", " << node->course.getNumber() << ", " << node->course.getTitle() << ", "
+            << node->course.getPrereqs().at(0) << ", " << node->course.getPrereqs().at(1) << " ==> " << endl;
     }
 }
 
 void BinarySearchTree::preOrder(Node* node) {
     // FixMe (11): Pre order root
     if (node != nullptr) {
-        cout << node->key << ", " << node->course.getCourseNumber() << ", " << node->course.getCourseTitle() << ", "
-            << node->course.getPrereq1() << ", " << node->course.getPrereq2() << " ==> " << endl;
+        cout << node->key << ", " << node->course.getNumber() << ", " << node->course.getTitle() << ", "
+            << node->course.getPrereqs().at(0) << ", " << node->course.getPrereqs().at(1) << " ==> " << endl;
         preOrder(node->left);
         preOrder(node->right);
     }
 }
 
-void loadLines(string csvPath, BinarySearchTree* bst) {
-    vector<string> theVector;
+void loadLines(string csvPath, BinarySearchTree bst) {
     Course theCourse;
     ifstream csv(csvPath);
-
-    vector<string> result;
-    string line, unused;
-
-    stringstream lineStream(line);
-    string cell;
-
-    getline(csv, line);
-    int numRows = 1;
-
-    while (getline(csv, unused)) {
-        ++numRows;
-    }
-
-    while (getline(csv, line)) {
-        for (int i = 0; i < numRows; i++) {
-            while (getline(lineStream, cell, ',')) {
-                result.push_back(cell);
+    if (csv.is_open()) {
+        string line;
+        vector<string> csvline;
+        
+        while (getline(csv, line)) {
+            printf(line.c_str());
+            stringstream ss(line.c_str());
+            while (ss.good()) {
+                string substr;
+                getline(ss, substr, ',');
+                csvline.push_back(substr);
             }
-            if (!lineStream && cell.empty()) {
-                result.push_back("");
+            theCourse.setNumber(csvline[0]);
+            theCourse.setTitle(csvline[1]);
+            if (csvline.size() >= 3) {
+                for (int i = 2; i < csvline.size(); i++) {
+                    theCourse.addPrereq(csvline[i]);
+                }
             }
+            
+            bst.Insert(theCourse);
+            csvline = vector<string>();
         }
+        csv.close();
     }
 
-    if (theVector.size() == 2) {
-        theCourse.setCourseNumber(theVector[0]);
-        theCourse.setCourseTitle(theVector[1]);
-    }
-
-    if (theVector.size() == 3) {
-        theCourse.setCourseNumber(theVector[0]);
-        theCourse.setCourseTitle(theVector[1]);
-        theCourse.setPrereq1(theVector[2]);
-    }
-
-    if (theVector.size() == 4) {
-        theCourse.setCourseNumber(theVector[0]);
-        theCourse.setCourseTitle(theVector[1]);
-        theCourse.setPrereq1(theVector[2]);
-        theCourse.setPrereq2(theVector[3]);
-    }
-    bst->Insert(theCourse);
-}
-
-Course vectorToCourse(vector<string> courseVector, BinarySearchTree* bst) {
-    Course theCourse;
-
-    
-    return theCourse;
 }
 
 int main(int argc, char* argv[]) {
@@ -335,7 +295,7 @@ int main(int argc, char* argv[]) {
     clock_t ticks;
 
     // Define a binary search tree to hold all bids
-    BinarySearchTree* bst = nullptr;
+    BinarySearchTree bst = BinarySearchTree();
 
     Course aCourse;
 
@@ -352,7 +312,6 @@ int main(int argc, char* argv[]) {
         switch (choice) {
 
         case 1:
-            bst = new BinarySearchTree();
 
             ticks = clock();
 
@@ -365,7 +324,7 @@ int main(int argc, char* argv[]) {
             break;
 
         case 2:
-            bst->InOrder();
+            bst.InOrder();
             break;
         }
     }
