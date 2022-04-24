@@ -91,7 +91,6 @@ private:
     void inOrder(Node* node);
     void postOrder(Node* node);
     void preOrder(Node* node);
-    vector<string> loadLines(string csvPath, BinarySearchTree* bst);
 
 public:
     BinarySearchTree();
@@ -163,6 +162,7 @@ Course BinarySearchTree::Search(string courseNumber) {
     // FIXME (7) Implement searching the tree for a course
     Node* curNode = root;
     Course course;
+
     unsigned key = atoi(courseNumber.c_str()) % 10;
 
     while (curNode != nullptr) {
@@ -241,7 +241,7 @@ void BinarySearchTree::preOrder(Node* node) {
     }
 }
 
-void loadLines(string csvPath, BinarySearchTree bst) {
+void loadLines(string csvPath, BinarySearchTree* bst) {
     Course theCourse;
     ifstream csv(csvPath);
     if (csv.is_open()) {
@@ -264,7 +264,7 @@ void loadLines(string csvPath, BinarySearchTree bst) {
                 }
             }
             
-            bst.Insert(theCourse);
+            bst->Insert(theCourse);
             csvline = vector<string>();
         }
         csv.close();
@@ -295,7 +295,7 @@ int main(int argc, char* argv[]) {
     clock_t ticks;
 
     // Define a binary search tree to hold all bids
-    BinarySearchTree bst = BinarySearchTree();
+    BinarySearchTree* bst = nullptr;
 
     Course aCourse;
 
@@ -312,6 +312,7 @@ int main(int argc, char* argv[]) {
         switch (choice) {
 
         case 1:
+            bst = new BinarySearchTree();
 
             ticks = clock();
 
@@ -324,9 +325,28 @@ int main(int argc, char* argv[]) {
             break;
 
         case 2:
-            bst.InOrder();
+            bst->InOrder();
+            break;
+
+        case 3:
+            ticks = clock();
+
+            aCourse = bst->Search(aCourseNumber);
+
+            ticks = clock() - ticks; // current clock ticks minus starting clock ticks
+
+            if (!aCourse.getNumber().empty()) {
+                cout << aCourse.getNumber() << endl;
+            }
+            else {
+                cout << "Course Number " << aCourseNumber << " not found." << endl;
+            }
+
+            cout << "time: " << ticks << " clock ticks" << endl;
+            cout << "time: " << ticks * 1.0 / CLOCKS_PER_SEC << " seconds" << endl;
+
             break;
         }
     }
-    return 0;
+    cout << "Good bye." << endl;
 }
