@@ -162,8 +162,9 @@ Course BinarySearchTree::Search(string courseNumber) {
     // FIXME (7) Implement searching the tree for a course
     Node* curNode = root;
     Course course;
+    string prekey = courseNumber.substr(courseNumber.length() - 3);
+    unsigned key = atoi(prekey.c_str()) % 10;
 
-    unsigned key = atoi(courseNumber.c_str()) % 10;
 
     while (curNode != nullptr) {
         if (curNode->key == key) {
@@ -216,8 +217,13 @@ void BinarySearchTree::inOrder(Node* node) {
     // FixMe (9): Pre order root
     if (node != nullptr) {
         inOrder(node->left);
-        cout << node->key << ", " << node->course.getNumber() << ", " << node->course.getTitle() << ", "
-            << node->course.getPrereqs().at(0) << ", " << node->course.getPrereqs().at(1) << " ==> " << endl;
+        
+        cout << node->key << ", " << node->course.getNumber() << ", " << node->course.getTitle();
+        vector<string> prereqs = node->course.getPrereqs();
+        for (int i = 0; i < prereqs.size(); i++) {
+            cout << " => " << prereqs[i];
+        }
+        cout << endl;
         inOrder(node->right);
     }
 }
@@ -242,13 +248,12 @@ void BinarySearchTree::preOrder(Node* node) {
 }
 
 void loadLines(string csvPath, BinarySearchTree* bst) {
-    Course theCourse;
     ifstream csv(csvPath);
     if (csv.is_open()) {
         string line;
-        vector<string> csvline;
-        
         while (getline(csv, line)) {
+            vector<string> csvline;
+            Course theCourse;
             printf(line.c_str());
             stringstream ss(line.c_str());
             while (ss.good()) {
@@ -265,7 +270,6 @@ void loadLines(string csvPath, BinarySearchTree* bst) {
             }
             
             bst->Insert(theCourse);
-            csvline = vector<string>();
         }
         csv.close();
     }
@@ -313,7 +317,6 @@ int main(int argc, char* argv[]) {
 
         case 1:
             bst = new BinarySearchTree();
-
             ticks = clock();
 
             loadLines(csvPath, bst);
@@ -344,9 +347,10 @@ int main(int argc, char* argv[]) {
 
             cout << "time: " << ticks << " clock ticks" << endl;
             cout << "time: " << ticks * 1.0 / CLOCKS_PER_SEC << " seconds" << endl;
-
             break;
+
         }
+
     }
     cout << "Good bye." << endl;
 }
